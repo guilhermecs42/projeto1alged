@@ -54,7 +54,7 @@ bool fila_cheia(FILA* fila){
 }
 
 // Retorna o primeiro item da fila, sem removê-lo
-void *fila_frente(FILA *fila){
+void* fila_frente(FILA* fila){
     if(!fila_vazia(fila)){
         return fila->inicio->item;
     }
@@ -123,4 +123,49 @@ void fila_apagar(FILA** fila){
         *fila = NULL; 
     }
     return;
+}
+
+// Imprime a fila usando um ponteiro para a função que imprimi cada item genérico
+void fila_imprimir(FILA* fila, void (*funcao_imprimir)(void*)){
+
+    if (fila_vazia(fila)) {
+        printf("Fila vazia ou nula.\n");
+        return;
+    }
+
+    NO* no_atual = fila->inicio;
+
+    printf("Fila: [INÍCIO]\n");
+    while (no_atual != NULL) {
+        funcao_imprimir(no_atual->item);  // Passa o ponteiro pro item do nó atual como argumento para a função que o imprimirá
+        no_atual = no_atual->prox;
+    }
+    printf("[FIM]\n");
+}
+
+void fila_salvar(FILA* fila, char* nomearquivo, void (*funcao_salvar)(void*, FILE*)){
+
+    if (fila_vazia(fila)) {
+        printf("Fila vazia ou nula.\n");
+        return;
+    }
+
+    FILE* arquivo;
+    arquivo = fopen(nomearquivo, "w");
+
+    if(arquivo == NULL){
+        printf("Erro ao abrir arquivo.\n");
+        return;
+    }
+
+    NO* no_atual = fila->inicio;
+
+    fprintf(arquivo, "Fila: [INÍCIO]\n");
+    while (no_atual != NULL) {
+        funcao_salvar(no_atual->item, arquivo);
+        no_atual = no_atual->prox;
+    }
+
+    fprintf(arquivo, "[FIM]\n");
+    fclose(arquivo);
 }
