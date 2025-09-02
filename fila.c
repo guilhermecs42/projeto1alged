@@ -53,6 +53,13 @@ bool fila_cheia(FILA* fila){
 	return true;
 }
 
+// Retorna o primeiro item da fila, sem removê-lo
+void *fila_frente(FILA *fila){
+    if(!fila_vazia(fila)){
+        return fila->inicio->item;
+    }
+    return NULL;
+}
 
 bool fila_inserir(FILA* fila, void* item){
 
