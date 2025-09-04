@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include "fila.h"
 
 typedef struct no_ NO;
-typedef struct fila_ FILA;
-
 struct no_{
     void* item;
     NO* prox;
@@ -144,7 +144,6 @@ void fila_imprimir(FILA* fila, void (*funcao_imprimir)(void*)){
 }
 
 void fila_salvar(FILA* fila, char* nomearquivo, void (*funcao_salvar)(void*, FILE*)){
-
     if (fila_vazia(fila)) {
         printf("Fila vazia ou nula.\n");
         return;
