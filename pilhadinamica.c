@@ -2,8 +2,8 @@
 #include<stdbool.h>
 #include<string.h>
 #include<stdio.h>
+#include "pilhadinamica.h"
 
-typedef struct pilha PILHA;
 typedef struct no NO;
 
 struct no{
