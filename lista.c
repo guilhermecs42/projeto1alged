@@ -17,7 +17,7 @@ struct lista_{
     int tam;
     void (*apagar_elemento)(void* elemento);
     void (*imprimir_elemento)(void* elemento);
-    void (*comparar_eemento)(void* item1, void* item2);
+    void (*comparar_elemento)(void* item1, void* item2);
 	void (*salvar_elemento)(void* elemento, FILE* arquivo);
 	bool (*carregar_elemento)(void** elemento, FILE* arquivo);
 };
