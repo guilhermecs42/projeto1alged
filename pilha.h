@@ -3,15 +3,18 @@
 	
 	#include<stdio.h>
 	#include<stdbool.h>
-	typedef struct pilha PILHA;
+	#include "tabela_funcoes.h"
 	
-	PILHA* pilha_criar(void (*item_apagar)(void* item), void (*item_salvar)(void* item, FILE* arquivo), bool (*item_carregar)(void** item, FILE* arquivo));
+	PILHA* pilha_criar(const TabelaFuncoes* funcoes);
 	bool pilha_vazia(PILHA* pilha);
 	bool pilha_cheia(PILHA* pilha);
 	int pilha_altura(PILHA* pilha);
+	void* pilha_topo(PILHA* pilha);
 	bool pilha_empilhar(PILHA* pilha, void* item);
 	void* pilha_desempilhar(PILHA* pilha);
-	void pilha_apagar(PILHA** pilha_ptr);
+	bool pilha_apagar(PILHA** pilha_ptr);
+	bool pilha_imprimir(PILHA* pilha);
+	bool pilha_buscar(PILHA* pilha, void* item);
 	bool pilha_salvar(PILHA* pilha, FILE* arquivo);
 	bool pilha_carregar(PILHA** pilha, FILE* arquivo);
 	
