@@ -20,7 +20,8 @@ struct lista_{
 };
 
 LISTA* lista_criar(const TabelaFuncoes* funcoes){
-
+	if(funcoes==NULL)return NULL;
+	
     LISTA* lista = (LISTA*)malloc(sizeof(LISTA));
 
     if(lista != NULL){
@@ -41,7 +42,9 @@ void lista_apagar(LISTA** lista){
 
         while (no_atual != NULL) {
             no_aux = no_atual->prox;                                 // Guarda o próximo nó
-            (*lista)->item_funcoes->item_apagar(&(no_atual->item));  // Apaga o item armazenado no nó
+            if((*lista)->item_funcoes->item_apagar != NULL){
+            	(*lista)->item_funcoes->item_apagar(&(no_atual->item));  // Apaga o item armazenado no nó
+            }
             free(no_atual);                                          // Libera o nó atual
             no_atual = no_aux;                                       // Avança para o próximo
         }
@@ -139,30 +142,32 @@ bool lista_inserir_posicao(LISTA* lista, void* item, int n){
     return true;
 }
 
-void* lista_remover_inicio(LISTA* lista){
-    
+void lista_remover_inicio(LISTA* lista){
+    if(lista == NULL || lista->item_funcoes->item_apagar == NULL){
+    	return;
+    }
     if(!lista_vazia(lista)){
-        void* item = lista->inicio->item;  // O ponteiro auxiliar 'item' recebe o endereço do item armazenado na lista
+        void* item = lista->inicio->item; 		 // O ponteiro auxiliar 'item' recebe o endereço do item armazenado na lista
 
-        NO* prox = lista->inicio->prox;    // O endereço do próximo nó após o início é armazenado num auxiliar 'prox'
-        free(lista->inicio);               // A memória alocada pro nó de início é liberada e
-        lista->inicio = prox;              // o início da lista recebe o endereço armazenado no auxiliar 'prox'
+        NO* prox = lista->inicio->prox;    	     // O endereço do próximo nó após o início é armazenado num auxiliar 'prox'
+        free(lista->inicio);               		 // A memória alocada pro nó de início é liberada e
+        lista->inicio = prox;           	     // o início da lista recebe o endereço armazenado no auxiliar 'prox'
         lista->tam--;
 
-        if(lista->tam == 0){               // Caso depois da remoção a lista fique vazia,
-            lista->fim = NULL;             // o fim da lista também deve receber NULL
+        if(lista->tam == 0){               		 // Caso depois da remoção a lista fique vazia,
+            lista->fim = NULL;             		 // o fim da lista também deve receber NULL
         }
-        return item;                       // Retorna o endereço do item
+        lista->item_funcoes->item_apagar(&item); // Apaga o item
     }
-    return NULL;
 }
 
-void* lista_remover_posicao(LISTA* lista, int n){
-    if(lista_vazia(lista) || n < 0 || n >= lista->tam){
-        return NULL;
+void lista_remover_posicao(LISTA* lista, int n){
+    if(lista_vazia(lista) || n < 0 || n >= lista->tam || lista->item_funcoes->item_apagar == NULL){
+        return;
     }
     if(n == 0){
-        return lista_remover_inicio(lista);
+        lista_remover_inicio(lista);
+        return;
     }
 
     NO* no_anterior = lista->inicio;
@@ -180,37 +185,90 @@ void* lista_remover_posicao(LISTA* lista, int n){
 
     free(no_remover);
     lista->tam--;
-    return item;
+    lista->item_funcoes->item_apagar(&item); // Apaga o item
 }
 
-void* lista_remover_fim(LISTA* lista){
+void lista_remover_fim(LISTA* lista){
     if(lista_vazia(lista)){
-        return NULL;
+        return;
     }
-    return lista_remover_posicao(lista, lista->tam - 1);
+    lista_remover_posicao(lista, lista->tam - 1);
 }
 
 void lista_imprimir(LISTA* lista){
-    if (lista == NULL || lista->item_funcoes == NULL || lista->item_funcoes->item_imprimir == NULL) {
+    if (lista == NULL || lista->item_funcoes->item_imprimir == NULL) {
         return;
     }
     if (lista_vazia(lista)) {
-        printf("Lista vazia.\n");
         return;
     }
 
     NO* no_atual = lista->inicio;
-    printf("======INICIO=LISTA======\n");
     while (no_atual != NULL) {
         lista->item_funcoes->item_imprimir(no_atual->item); // Chamada via tabela de funções
         no_atual = no_atual->prox;
     }
-    printf("======FINAL=LISTA======\n");
+}
+
+
+bool lista_remover_chave(LISTA* lista, void* chave) {
+    if (lista == NULL || chave == NULL || lista_vazia(lista) || lista->item_funcoes->item_comparar == NULL || lista->item_funcoes->item_apagar == NULL) {
+        return false;
+    }
+
+ 	// lógica de busca:
+    NO* no_atual = lista->inicio;
+    NO* no_anterior = NULL;
+
+    while (no_atual != NULL) {
+        // Compara o item do nó atual com a chave de busca
+        if (lista->item_funcoes->item_comparar(no_atual->item, chave) == 0) { // se encontrou o item:
+
+            if (no_anterior == NULL) {
+                lista->inicio = no_atual->prox;
+            } else {
+                no_anterior->prox = no_atual->prox;
+            }
+
+            if (no_atual == lista->fim) {
+                lista->fim = no_anterior;
+            }
+
+            lista->item_funcoes->item_apagar(&(no_atual->item));
+            free(no_atual);
+            
+            lista->tam--;
+            return true; // sucesso
+        }
+
+        // se não encontrou, avança os ponteiros para a próxima iteração
+        no_anterior = no_atual;
+        no_atual = no_atual->prox;
+    }
+
+    // se o laço terminar, o item não foi encontrado na lista
+    return false;
+}
+
+LISTA* lista_buscar(LISTA* lista, void* item){
+	if(item == NULL || lista == NULL || lista->item_funcoes->item_comparar == NULL || lista->item_funcoes->item_copiar == NULL){
+		return NULL;
+	}
+	NO* aux = lista->inicio;
+	LISTA* resultados = lista_criar(lista->item_funcoes);
+	if(resultados==NULL) return NULL;
+	while(aux != NULL){
+		if(lista->item_funcoes->item_comparar(aux->item, item) == 0){
+			void* copia_item = lista->item_funcoes->item_copiar(aux->item);
+			lista_inserir_fim(resultados, copia_item);
+		}
+		aux = aux->prox;
+	}
+	return resultados;
 }
 
 bool lista_salvar(LISTA* lista, FILE* arquivo){
-    if (lista == NULL || arquivo == NULL || lista->item_funcoes == NULL || lista->item_funcoes->item_salvar == NULL) {
-        printf("Erro ao tentar salvar lista\n");
+    if (lista == NULL || arquivo == NULL || lista->item_funcoes->item_salvar == NULL) {
         return false;
     }
 
@@ -225,8 +283,7 @@ bool lista_salvar(LISTA* lista, FILE* arquivo){
 }
 
 bool lista_carregar(LISTA** lista, FILE* arquivo){
-	if(*lista == NULL || (*lista)->item_funcoes == NULL || (*lista)->item_funcoes->item_carregar == NULL){
-        printf("Erro ao tentar carregar lista\n");
+	if(arquivo == NULL || lista == NULL || *lista == NULL || (*lista)->item_funcoes->item_carregar == NULL){
 		return false;
 	}
 	char linha[100];
@@ -243,9 +300,8 @@ bool lista_carregar(LISTA** lista, FILE* arquivo){
         fseek(arquivo, ultima_pos, SEEK_SET);
         return false;
     }
-
 	while(1){
-		void* item; // cria uma variável local que vai receber o endereço do próximo item a ser inserido na lista
+		void* item = NULL; // cria uma variável local que vai receber o endereço do próximo item a ser inserido na lista
 		if(lista_temp->item_funcoes->item_carregar(&item, arquivo) == false){
 			// lê do arquivo o próximo item da lista e guarda o endereço da struct na variável local.
 			// se falhar, sai do loop: pode ser que tenha chegado no rodapé, ou que o arquivo esteja corrompido
