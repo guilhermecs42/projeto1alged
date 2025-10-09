@@ -3,7 +3,7 @@
 #include "pilha.h"
 #include "tabela_funcoes.h"
 
-typedef struct pilha_ PILHA;
+
 typedef struct no_ NO;
 
 struct no_{
@@ -74,20 +74,22 @@ bool pilha_empilhar(PILHA* pilha, void* item){
 	return false;
 }
 
-void* pilha_desempilhar(PILHA* pilha){
+void pilha_remover_topo(PILHA* pilha){
 	if(!pilha_vazia(pilha)){
-		void* retorno = pilha->topo->item;
+		void* item = pilha->topo->item;
 		NO* topo_antigo = pilha->topo;
 		pilha->topo = pilha->topo->anterior;
+		pilha->altura--;
+		
 		topo_antigo->anterior = NULL; // isola o nó antes de dar free nele, evita bugs de dangling pointer
 		free(topo_antigo);
 		topo_antigo = NULL;
-		return retorno;
+		
+		pilha->item_funcoes->item_apagar(&item);
 	}
-	return NULL;
 }
 
-bool pilha_apagar(PILHA** pilha_ptr){
+void pilha_apagar(PILHA** pilha_ptr){
 	NO* no_aux;
 	if(*pilha_ptr != NULL && !pilha_vazia(*pilha_ptr)){
 		while((*pilha_ptr)->topo != NULL){
@@ -149,7 +151,7 @@ bool pilha_salvar(PILHA* pilha, FILE* arquivo){
 }
 
 bool pilha_carregar(PILHA** pilha, FILE* arquivo){
-	if(*pilha == NULL || (*pilha)->item_funcoes->item_carregar == NULL){
+	if(pilha == NULL || *pilha == NULL || (*pilha)->item_funcoes->item_carregar == NULL){
 		return false;
 	}
 	char linha[100];

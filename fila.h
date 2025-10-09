@@ -12,10 +12,11 @@
 	bool fila_cheia(FILA* fila);
 	void* fila_frente(FILA* fila);
 	bool fila_inserir(FILA* fila, void* item);
-	void* fila_remover(FILA* fila);
+	void* fila_remover_frente(FILA* fila);
 	void fila_apagar(FILA** fila);
 	void fila_imprimir(FILA* fila);
 	bool fila_salvar(FILA* fila, FILE* arquivo);
 	bool fila_carregar(FILA** fila, FILE* arquivo);
-	
+	bool fila_buscar(FILA* fila, void* item);
+
 #endif
