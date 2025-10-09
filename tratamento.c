@@ -114,8 +114,6 @@ void* tratamento_copiar(void* tratamento){
 	return copia;
 }
 
-
-
 static const TabelaFuncoes TratamentoFuncoes = { // estou criando uma struct do tipo TabelaFuncoes e fazendo cada atribuição
 	.item_apagar = tratamento_apagar,
 	.item_imprimir = tratamento_imprimir,

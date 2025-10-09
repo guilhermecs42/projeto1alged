@@ -267,6 +267,22 @@ LISTA* lista_buscar(LISTA* lista, void* item){
 	return resultados;
 }
 
+void* lista_buscar_ponteiro(LISTA* lista, void* chave){
+    if(lista == NULL || chave == NULL || lista->item_funcoes->item_comparar == NULL){
+        return NULL;
+    }
+    NO* no_atual = lista->inicio;
+
+    while(no_atual != NULL){
+        if(lista->item_funcoes->item_comparar(no_atual->item, chave) == 0){
+            return no_atual->item; // Se encontrou, retorna o ponteiro para o dado.
+        }
+        no_atual = no_atual->prox; // Avança para o próximo nó
+    }
+    // Se o loop terminar, o item não foi encontrado na lista
+    return NULL;
+}
+
 bool lista_salvar(LISTA* lista, FILE* arquivo){
     if (lista == NULL || arquivo == NULL || lista->item_funcoes->item_salvar == NULL) {
         return false;

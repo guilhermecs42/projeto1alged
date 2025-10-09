@@ -217,6 +217,118 @@ void registrar_paciente(REGISTRO* registro_de_pacientes){
 	return;
 }
 
+void adicionar_procedimento(REGISTRO* registro_de_pacientes){
+	int id_lido;
+	printf("Qual é o ID do paciente a ser adicionado o procedimento?:\n");
+	if(perguntar_numero(&id_lido)==false){
+		printf("Não foi possível ler o ID.\n");
+		return;
+	}
+	if(id_lido == 0){
+		printf("Cancelando operação.\n");
+		return;
+	}
+	PACIENTE* chave_busca = (PACIENTE*)paciente_criar(id_lido, "");
+	if(chave_busca == NULL){
+		printf("Erro na alocação da chave de busca.\n");
+	}
+	PACIENTE* paciente_encontrado = (PACIENTE*)lista_buscar_ponteiro(registro_de_pacientes->lista_de_pacientes, (void*)chave_busca);
+	paciente_apagar((void**)&chave_busca);
+	if(paciente_encontrado == NULL){
+		printf("Esse ID não foi encontrado no Registro.\n");
+		return;
+	}
+    if(paciente_historico_cheio(paciente_encontrado)){
+        printf("O histórico de procedimentos do paciente está cheio.\n");
+        return;
+    }
+    char nome_medicamento[101];
+    printf("Digite o nome do medicamento/procedimento:\n");
+    if(!perguntar_string(nome_medicamento, 101)){
+        printf("Erro ao ler o nome do procedimento.\n");
+        return;
+    }
+    if(strcmp(nome_medicamento, "0") == 0){
+        printf("Operação cancelada pelo usuário.\n");
+        return;
+    }
+    TRATAMENTO* novo_tratamento = tratamento_criar(nome_medicamento);
+    if(novo_tratamento == NULL){
+        printf("Erro ao criar o registro do tratamento.\n");
+        return;
+    }
+    if(paciente_adicionar_tratamento(paciente_encontrado, novo_tratamento) != false){
+        printf("Procedimento adicionado com sucesso!\n");
+    }else{
+        printf("Falha ao adicionar o procedimento ao histórico do paciente.\n");
+        tratamento_apagar((void**)&novo_tratamento);
+    }
+	return;
+}
+
+void desfazer_procedimento(REGISTRO* registro_de_pacientes){
+	int id_lido;
+	printf("Qual é o ID do paciente a ser removido o procedimento?:\n");
+	if(perguntar_numero(&id_lido)==false){
+		printf("Não foi possível ler o ID.\n");
+		return;
+	}
+	if(id_lido == 0){
+		printf("Cancelando operação.\n");
+		return;
+	}
+	PACIENTE* chave_busca = (PACIENTE*)paciente_criar(id_lido, "");
+	if(chave_busca == NULL){
+		printf("Erro na alocação da chave de busca.\n");
+	}
+	PACIENTE* paciente_encontrado = (PACIENTE*)lista_buscar_ponteiro(registro_de_pacientes->lista_de_pacientes, (void*)chave_busca);
+	paciente_apagar((void**)&chave_busca);
+	if(paciente_encontrado == NULL){
+		printf("Esse ID não foi encontrado no Registro.\n");
+		return;
+	}
+    if(paciente_historico_vazio(paciente_encontrado)){
+        printf("O histórico de procedimentos do paciente está vázio.\n");
+        return;
+    }
+    if(paciente_remover_tratamento(paciente_encontrado)){
+        printf("Último procedimento desfeito com sucesso.\n");
+    }else{
+        printf("Não foi possível desfazer o procedimento.\n");
+    }
+	return;
+}
+
+void mostrar_historico(REGISTRO* registro_de_pacientes){
+	int id_lido;
+	printf("Qual é o ID do paciente a ser exibido o histórico?:\n");
+	if(perguntar_numero(&id_lido)==false){
+		printf("Não foi possível ler o ID.\n");
+		return;
+	}
+	if(id_lido == 0){
+		printf("Cancelando operação.\n");
+		return;
+	}
+	PACIENTE* chave_busca = (PACIENTE*)paciente_criar(id_lido, "");
+	if(chave_busca == NULL){
+		printf("Erro na alocação da chave de busca.\n");
+	}
+	PACIENTE* paciente_encontrado = (PACIENTE*)lista_buscar_ponteiro(registro_de_pacientes->lista_de_pacientes, (void*)chave_busca);
+	paciente_apagar((void**)&chave_busca);
+	if(paciente_encontrado == NULL){
+		printf("Esse ID não foi encontrado no Registro.\n");
+		return;
+	}
+    if(paciente_historico_vazio(paciente_encontrado)){
+        printf("O histórico de procedimentos do paciente está vázio.\n");
+        return;
+    }
+	if(paciente_consultar_historico(paciente_encontrado) == false){
+		printf("Erro ao tentar imprimir hitórico do paciente\n");
+	}
+	return;
+}
 void paciente_morreu(REGISTRO* registro_de_pacientes){ // GIOVANNI: ADICIONE O PARÂMETRO FILA* fila_de_espera AQUI
 	int id_lido;
 	printf("Qual é o ID do paciente falecido?:\n");
@@ -230,10 +342,10 @@ void paciente_morreu(REGISTRO* registro_de_pacientes){ // GIOVANNI: ADICIONE O P
 	
 	PACIENTE* chave_busca = paciente_criar(id_lido, "");
 	if(lista_remover_chave(registro_de_pacientes->lista_de_pacientes, (void*)chave_busca) == false){
-		printf("Esse ID não foi encontrado no Registro.");
+		printf("Esse ID não foi encontrado no Registro.\n");
 		return;
 	}
-	printf("Paciente removido do Registro com sucesso.");
+	printf("Paciente removido do Registro com sucesso.\n");
 	return;
 }
 	
@@ -305,16 +417,18 @@ int main(){
 			case REGISTRAR_PACIENTE:
 				registrar_paciente(registro_de_pacientes);
 				break;
-			case CHAMAR_PACIENTE: // GIOVANNI: VOCÊ DEVE IMPLEMENTAR ESSA FUNÇÃO. O PACIENTE DEVE SER RETIRADO SOMENTE DA FILA! LEMBRE DE FAZER AS VERIFICAÇÕES NECESSÁRIAS
+			case CHAMAR_PACIENTE: // GIOVANNI: VOCÊ DEVE IMPLEMENTAR0 ESSA FUNÇÃO. O PACIENTE DEVE SER RETIRADO SOMENTE DA FILA! LEMBRE DE FAZER AS VERIFICAÇÕES NECESSÁRIAS
 				break;
-			case ADD_PROCEDIMENTO: // CLEYTON: VOCÊ DEVE IMPLEMENTAR ESSA FUNÇÃO. PERGUNTE O ID DO PACIENTE, O NOME DO TRATAMENTO E USE A FUNÇÃO paciente_adicionar_tratamento. USE AS FUNÇÕES DE entrada.h PARA OBTER OS INPUTS DE FORMA SEGURA.
-			// CLEYTON: POR FAVOR, TESTE SE A FEATURE DE SALVAR O REGISTRO E CARREGAR ELE AINDA FUNCIONA APÓS IMPLEMENTAR OS TRATAMENTOS. OLHE DENTRO DO ARQUIVO!!! SE ALGUMA COISA QUEBRAR, DEBUGUE O SEU CÓDIGO PARA VER SE TEM ALGO ERRADO. SE AINDA NÃO ESTIVER FUNCIONANDO, ME AVISE!!!
+			case ADD_PROCEDIMENTO:
+				adicionar_procedimento(registro_de_pacientes);
 				break;
-			case DESFAZER_PROCEDIMENTO: // CLEYTON: OS MESMOS AVISOS QUE A FUNÇÃO DE CIMA. TESTE O SALVAMENTO DO REGISTRO!!! OLHE DENTRO DO ARQUIVO!!!
+			case DESFAZER_PROCEDIMENTO:
+				desfazer_procedimento(registro_de_pacientes);
 				break;
 			case MOSTRAR_FILA: // GIOVANNI: MOSTRE A FILA DE PACIENTES, MAS NÃO MOSTRE O HISTÓRICO (PILHA DE TRATAMENTOS) DE CADA UM! SÓ NOME E ID! NÃO DEVE SER DIFÍCIL!
 				break;
-			case MOSTRAR_HISTORICO: // CLEYTON: PERGUNTE UM ID, E DEVOLVA O HISTÓRICO DO PACIENTE. USE A FUNÇÃO paciente_consultar_historico. NÃO DEVE SER DIFÍCIL!
+			case MOSTRAR_HISTORICO:
+				mostrar_historico(registro_de_pacientes);
 				break;
 			case PACIENTE_MORREU:
 				paciente_morreu(registro_de_pacientes); // GIOVANNI: AQUI PRECISA ALTERAR, É NECESSÁRIO PASSAR A FILA COMO ARGUMENTO TAMBÉM PARA VERIFICAR SE O PACIENTE ESTÁ NA FILA DE ESPERA
