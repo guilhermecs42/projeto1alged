@@ -3,6 +3,7 @@
 	
 	#include<stdbool.h>
 	#include<stdio.h>
+	#include "tabela_funcoes.h"
 	
 	typedef struct tratamento_ TRATAMENTO;
 	
@@ -17,5 +18,9 @@
 	bool tratamento_salvar(void* tratamento, FILE* arquivo);
 	
 	bool tratamento_carregar(void** tratamento, FILE* arquivo);
+	
+	void* tratamento_copiar(void* tratamento);
+	
+	const TabelaFuncoes* get_tratamento_funcoes();
 	
 #endif
