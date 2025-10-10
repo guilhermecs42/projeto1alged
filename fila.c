@@ -79,7 +79,7 @@ bool fila_inserir(FILA* fila, void* item){
     return false;
 }
 
-void* fila_remover(FILA* fila){
+bool fila_remover_frente(FILA* fila){
     if(!fila_vazia(fila)){
         void* item = fila->inicio->item;  // O ponteiro auxiliar 'item' recebe o endereço do item armazenado na fila
         NO* prox = fila->inicio->prox;    // O endereço do próximo nó após o início é armazenado num auxiliar 'prox'
@@ -89,9 +89,10 @@ void* fila_remover(FILA* fila){
         if(fila->tam == 0){               // Caso depois da remoção a fila fique vazia,
             fila->fim = NULL;             // o fim da fila também deve receber NULL
         }
-        return item;                      // Retorna o endereço do item 
-    }
-    return NULL;
+        fila->item_funcoes->item_apagar(&item); // Apaga o item 
+    }	return true;
+    
+    return false;
 }
 
 void fila_apagar(FILA** fila){
@@ -112,17 +113,17 @@ void fila_apagar(FILA** fila){
     }
 }
 
+
+
 void fila_imprimir(FILA* fila){
     if (fila == NULL || fila_vazia(fila) || fila->item_funcoes == NULL || fila->item_funcoes->item_imprimir == NULL) {
         return;
     }
     NO* no_atual = fila->inicio;
-    printf("======INICIO=FILA======\n");
     while (no_atual != NULL) {
         fila->item_funcoes->item_imprimir(no_atual->item); // Chamada via tabela de funções
         no_atual = no_atual->prox;
     }
-    printf("======FIM=FILA======\n");
 }
 
 bool fila_salvar(FILA* fila, FILE* arquivo){
@@ -179,4 +180,20 @@ bool fila_carregar(FILA** fila, FILE* arquivo){
 	fila_apagar(fila); // apaga a fila antiga
 	*fila = fila_temp; // substitui pela fila nova
 	return true;
+}
+
+void* fila_buscar(FILA* fila, void* item){
+    if(item == NULL || fila == NULL || fila->item_funcoes == NULL || fila->item_funcoes->item_comparar == NULL){
+        return NULL;
+    }
+
+    NO* aux = fila->inicio;
+    while(aux != NULL){
+        if(fila->item_funcoes->item_comparar(aux->item, item) == 0){
+            return aux->item;
+        }
+        aux = aux->prox;
+    }
+
+    return NULL;
 }

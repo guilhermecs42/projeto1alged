@@ -17,7 +17,10 @@
 	void* lista_remover_inicio(LISTA* lista);
 	void* lista_remover_posicao(LISTA* lista, int n);
 	void* lista_remover_fim(LISTA* lista);
+	bool lista_remover_chave(LISTA* lista, void* chave);
 	void lista_imprimir(LISTA* lista);
+	LISTA* lista_buscar(LISTA* lista, void* item);
+	void* lista_buscar_ponteiro(LISTA* lista, void* chave);
 	bool lista_salvar(LISTA* lista, FILE* arquivo);
 	bool lista_carregar(LISTA** lista, FILE* arquivo);
 

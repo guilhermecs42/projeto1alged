@@ -10,6 +10,7 @@
 		int  (*item_comparar)(void*, void*);
 		bool (*item_salvar)(void*, FILE*);
 		bool (*item_carregar)(void**, FILE*);
+		void* (*item_copiar)(void* item_original);
 	} TabelaFuncoes; // o nome técnico é Dispatch Table
 	
 #endif
