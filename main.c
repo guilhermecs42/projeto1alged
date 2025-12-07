@@ -2,21 +2,11 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include "entrada.h"
-#include "fila.h"
+#include "heap.h"
 #include "pilha.h"
 #include "lista.h"
 #include "paciente.h"
 #define FILA_TAM_MAX 50
-
-//CLEYTON
-//GIOVANNI
-//O NOSSO SISTEMA TEM UMA FEATURE PARA SER MAIS AMIGÁVEL COM O USUÁRIO: QUANDO O USUÁRIO DIGITAR '0' EM ALGUM MOMENTO, É COMO SE ELE ESTIVESSE PEDINDO PARA CANCELAR A OPERAÇÃO.
-// NÃO PRECISA IMPLEMENTAR ESSA FEATURE EM TODOS OS INPUTS QUE VOCÊS IMPLEMENTAREM, MAS TENTEM PELO MENOS ALGUMAS VEZES
-// OLHEM BEM AS FUNÇÕES DE entrada.h PARA ENTENDER COMO VOCÊS VÃO RECEBER OS INPUTS!!!
-// PROGRAMEM NA MÃO E CORRIJAM COM GPT!!! NÃO DEIXEM PASSAR VAZAMENTOS DE MEMÓRIA!!!
-// NESSA SEÇÃO DO CÓDIGO VAMOS DEFINIR O REGISTRO DE PACIENTES E ALGUMAS DE SUAS OPERAÇÕES
-
-
 
 typedef struct registro REGISTRO;
 
@@ -121,12 +111,12 @@ bool registro_carregar(REGISTRO** registro, FILE* arquivo) {
 
 
 
-bool sistema_sair(REGISTRO** registro_de_pacientes, char* nome_arquivo, FILA** fila_de_espera, char* arquivo_fila){
-	if(registro_de_pacientes == NULL || nome_arquivo == NULL || fila_de_espera == NULL || arquivo_fila == NULL){ // a função foi chamada sem ter um Registro de Pacientes definido, Fila de Espera, nome de arquivo
+bool sistema_sair(REGISTRO** registro_de_pacientes, char* nome_arquivo, HEAP** heap_de_espera, char* arquivo_fila){
+	if(registro_de_pacientes == NULL || nome_arquivo == NULL || heap_de_espera == NULL || arquivo_fila == NULL){ // a função foi chamada sem ter um Registro de Pacientes definido, Fila de Espera, nome de arquivo
 		registro_apagar(registro_de_pacientes);
 		*registro_de_pacientes = NULL;
-		fila_apagar(fila_de_espera);
-		*fila_de_espera = NULL;
+		heap_apagar(heap_de_espera);
+		*heap_de_espera = NULL;
 		return true;
 	}
 	FILE* arquivo = fopen(nome_arquivo, "w");
@@ -143,16 +133,16 @@ bool sistema_sair(REGISTRO** registro_de_pacientes, char* nome_arquivo, FILA** f
 		return false;
 	}
 	
-	FILE* fila_arquivo = fopen(arquivo_fila, "w");
-	if(fila_arquivo == NULL){
+	FILE* heap_arquivo = fopen(arquivo_fila, "w");
+	if(heap_arquivo == NULL){
 		printf("Não foi possível acessar o arquivo da Fila de Espera. Não se pode sair do sistema.");
 		return false;
 	}
-	if(fila_salvar(*fila_de_espera, fila_arquivo)==false){
+	if(heap_salvar(*heap_de_espera, heap_arquivo)==false){
 		printf("Não foi possível salvar a Fila de Espera. Não se pode sair do sistema.");
 		return false;
 	}
-	if(fclose(fila_arquivo)!=0){
+	if(fclose(heap_arquivo)!=0){
 		printf("Não foi possível fechar o arquivo da Fila de Espera. Não se pode sair do sistema.");
 		return false;
 	}
@@ -160,7 +150,7 @@ bool sistema_sair(REGISTRO** registro_de_pacientes, char* nome_arquivo, FILA** f
 	return true;
 }
 
-void registrar_paciente(REGISTRO* registro_de_pacientes, FILA* fila_de_espera){
+void registrar_paciente(REGISTRO* registro_de_pacientes, HEAP* heap_de_espera){
 	char nome[101];
 	printf("Digite o nome do paciente: \n");
 	if(perguntar_string(nome, 101)==false){
@@ -171,6 +161,35 @@ void registrar_paciente(REGISTRO* registro_de_pacientes, FILA* fila_de_espera){
 		printf("Cancelando operação.\n");
 		return;
 	}
+	char prioridade;
+    char buffer_prioridade[5];
+
+    while(1) {
+        printf("Digite o nível de prioridade do paciente: \n");
+		printf("\n=== NIVEIS DE PRIORIDADE ===\n");
+		printf("[A] Emergência\n");
+		printf("[B] Muito Urgente\n");
+		printf("[C] Urgente\n");
+		printf("[D] Pouco Urgente\n");
+		printf("[E] Não Urgente\n");
+        
+        if(perguntar_string(buffer_prioridade, 5) == false){
+            printf("Erro ao ler prioridade. Encerrando operação.\n");
+            return;
+        }
+
+        if(strcmp(buffer_prioridade, "0") == 0){
+            printf("Cancelando operação.\n");
+            return;
+        }
+
+        if(strlen(buffer_prioridade) == 1){
+            prioridade = buffer_prioridade[0]; // Pega o primeiro caractere
+            break; // Sai do loop, prioridade válida
+        } else {
+            printf("Entrada inválida. Digite apenas um único caractere para a prioridade.\n");
+        }
+    }
 	PACIENTE* chave_busca = (PACIENTE*)paciente_criar(-1, nome);
 	if(chave_busca == NULL){
 		printf("Erro na alocação da chave de busca.\n");
@@ -226,16 +245,16 @@ void registrar_paciente(REGISTRO* registro_de_pacientes, FILA* fila_de_espera){
 		printf("Paciente registrado com ID %d\n", registro_de_pacientes->contagem_id-1);
 	}
 	
-	if(fila_tamanho(fila_de_espera)>=FILA_TAM_MAX){
+	if(heap_tamanho(heap_de_espera)>=FILA_TAM_MAX){
 		printf("A fila de espera está cheia. Não foi possível inserir o paciente nela.\n");
 		return;
 	}
 	
 	PACIENTE* paciente_fila = (PACIENTE*)paciente_criar(id_escolhido, nome);
 	PACIENTE* chave_busca_fila = (PACIENTE*)paciente_criar(id_escolhido, "");
-	PACIENTE* paciente_talvez_na_fila = (PACIENTE*)fila_buscar(fila_de_espera, chave_busca_fila);
+	PACIENTE* paciente_talvez_na_fila = (PACIENTE*)heap_buscar(heap_de_espera, chave_busca_fila);
 	if(paciente_talvez_na_fila == NULL){
-		if(fila_inserir(fila_de_espera, paciente_fila) == false){
+		if(heap_inserir(heap_de_espera, paciente_fila, prioridade) == false){
 			printf("Erro ao inserir o paciente na Fila de Espera.\n");
 			paciente_apagar((void**)&chave_busca_fila);
 			paciente_apagar((void**)&paciente_fila);
@@ -248,7 +267,7 @@ void registrar_paciente(REGISTRO* registro_de_pacientes, FILA* fila_de_espera){
 		paciente_apagar((void**)&chave_busca_fila);
 		paciente_apagar((void**)&paciente_fila);
 	}else{
-		if(fila_inserir(fila_de_espera, paciente_fila) == false){
+		if(heap_inserir(heap_de_espera, paciente_fila, prioridade) == false){
 			printf("Erro ao inserir o paciente na Fila de Espera.\n");
 			paciente_apagar((void**)&paciente_fila);
 			paciente_apagar((void**)&chave_busca_fila);
@@ -373,7 +392,7 @@ void mostrar_historico(REGISTRO* registro_de_pacientes){
 	}
 	return;
 }
-void paciente_morreu(REGISTRO* registro_de_pacientes, FILA* fila_de_espera){ // GIOVANNI: ADICIONE O PARÂMETRO FILA* fila_de_espera AQUI
+void paciente_morreu(REGISTRO* registro_de_pacientes, HEAP* heap_de_espera){ // GIOVANNI: ADICIONE O PARÂMETRO FILA* heap_de_espera AQUI
 	int id_lido;
 	printf("Qual é o ID do paciente falecido?:\n");
 	if(perguntar_numero(&id_lido)==false){
@@ -381,7 +400,7 @@ void paciente_morreu(REGISTRO* registro_de_pacientes, FILA* fila_de_espera){ // 
 		return;
 	}
 	PACIENTE* chave_busca = paciente_criar(id_lido, "");
-	if(fila_buscar(fila_de_espera, chave_busca)){ // GUILHERME: SERÁ QUE ESSA FUNÇÃO FILA_BUSCAR ESTÁ CORRETA?
+	if(heap_buscar(heap_de_espera, chave_busca)){ // GUILHERME: SERÁ QUE ESSA FUNÇÃO FILA_BUSCAR ESTÁ CORRETA?
 		printf("Paciente está na Fila de Espera. Não é permitido apagá-lo do registro.\n");
 		paciente_apagar((void**)&chave_busca);
 		return;
@@ -450,8 +469,8 @@ int main(){
 	}
 	
 	printf("Digite o nome do arquivo da Fila de Espera. \nDigite '1' se deseja criar uma Fila de Espera nova durante a operação do sistema:\n");
-	FILA* fila_de_espera = fila_criar(get_paciente_funcoes());
-	if(fila_de_espera == NULL){
+	HEAP* heap_de_espera = heap_criar(get_paciente_funcoes());
+	if(heap_de_espera == NULL){
 		printf("Erro ao criar a Fila de Espera\n");
 	}
 	char arquivo_fila[101];
@@ -462,7 +481,7 @@ int main(){
 		if(strcmp(arquivo_fila, "0")==0){
 			printf("Saindo...\n");
 			registro_apagar(&registro_de_pacientes);
-        	fila_apagar(&fila_de_espera);
+        	heap_apagar(&heap_de_espera);
 			return 0;
 		}
 		if(strcmp(arquivo_fila, "1")==0){
@@ -478,7 +497,7 @@ int main(){
 			printf("Arquivo não encontrado. Tente novamente.\n");
 			continue;
 		}else{
-			if(fila_carregar(&fila_de_espera, arquivo_aberto_fila)==false){
+			if(heap_carregar(&heap_de_espera, arquivo_aberto_fila)==false){
 				printf("Arquivo não corresponde a um registro válido. Tente novamente.\n");
 			}else{ 
 				if(fclose(arquivo_aberto_fila)!=0){
@@ -496,24 +515,24 @@ int main(){
 		acao = perguntar_comando();
 		switch(acao){
 			case SAIR: 
-				if(sistema_sair(&registro_de_pacientes, nome_arquivo, &fila_de_espera, arquivo_fila)){
+				if(sistema_sair(&registro_de_pacientes, nome_arquivo, &heap_de_espera, arquivo_fila)){
 					printf("Saindo...\n");
 					registro_apagar(&registro_de_pacientes);
-        			fila_apagar(&fila_de_espera);
+        			heap_apagar(&heap_de_espera);
 					return 0; 
 				}
 				break;
 			case REGISTRAR_PACIENTE:
-				registrar_paciente(registro_de_pacientes, fila_de_espera);
+				registrar_paciente(registro_de_pacientes, heap_de_espera);
 				break;
-			case CHAMAR_PACIENTE: // GIOVANNI: VOCÊ DEVE IMPLEMENTAR0 ESSA FUNÇÃO. O PACIENTE DEVE SER RETIRADO SOMENTE DA FILA! LEMBRE DE FAZER AS VERIFICAÇÕES NECESSÁRIAS
-				if(fila_vazia(fila_de_espera)){
+			case CHAMAR_PACIENTE:
+				if(heap_vazia(heap_de_espera)){
 					printf("A Fila de Espera está vazia. Não é possível chamar um paciente.\n");
 				}
 				else{
 					printf("Paciente chamado:\n");
-					paciente_imprimir((PACIENTE*)fila_frente(fila_de_espera));
-					fila_remover_frente(fila_de_espera);
+					paciente_imprimir((PACIENTE*)heap_proximo(heap_de_espera));
+					heap_remover_prox(heap_de_espera);
 				}
 				break;
 			case ADD_PROCEDIMENTO:
@@ -522,19 +541,19 @@ int main(){
 			case DESFAZER_PROCEDIMENTO:
 				desfazer_procedimento(registro_de_pacientes);
 				break;
-			case MOSTRAR_FILA: // GIOVANNI: MOSTRE A FILA DE PACIENTES, MAS NÃO MOSTRE O HISTÓRICO (PILHA DE TRATAMENTOS) DE CADA UM! SÓ NOME E ID! NÃO DEVE SER DIFÍCIL!
-				if(fila_vazia(fila_de_espera)){
+			case MOSTRAR_FILA:
+				if(heap_vazia(heap_de_espera)){
 					printf("\nA Fila de Espera está vazia.\n");
 				}else{
 					printf("\nFila de espera (pacientes mais antigos primeiro):\n");
-					fila_imprimir(fila_de_espera);
+					heap_imprimir(heap_de_espera);
 				}	
 				break;
 			case MOSTRAR_HISTORICO:
 				mostrar_historico(registro_de_pacientes);
 				break;
 			case PACIENTE_MORREU:
-				paciente_morreu(registro_de_pacientes, fila_de_espera); // GIOVANNI: AQUI PRECISA ALTERAR, É NECESSÁRIO PASSAR A FILA COMO ARGUMENTO TAMBÉM PARA VERIFICAR SE O PACIENTE ESTÁ NA FILA DE ESPERA
+				paciente_morreu(registro_de_pacientes, heap_de_espera);
 				break;
 			case MOSTRAR_REGISTRO:
 				printf("Eis o Registro de Pacientes: \n");
