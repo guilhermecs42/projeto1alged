@@ -18,6 +18,8 @@ A escolha da Árvore AVL para o registro de pacientes é justificada pela necess
 
 2.  **Complexidade O(log n) para inserção:** Como a inserção de um novo nó na árvore envolve a busca (O(log n)), a inserção do nó (O(1)) e o processo de rebalanceamento (rotações, O(log n) no pior caso), a AVL tem custo total de O(log n), ou seja, é muito eficiente para inserções.
 
+Uma outra opção com essas características seria a Árvore Rubro-Negra, que é um pouco mais lenta que a AVL para buscas e um pouco mais rápida para inserções. Como um paciente é inserido somente uma vez mas é buscado possivelmente várias vezes, a vantagem da AVL em buscas se sobressai.
+
 ### Heap para a Fila de Prioridade
 
 Devido a sua eficiência para lidar como valores de máximo e mínimo (como casos de emergência e casos não urgentes), a heap é excelente para ser utilizada como fila de prioridade.
@@ -27,6 +29,8 @@ Devido a sua eficiência para lidar como valores de máximo e mínimo (como caso
 2. **Eficiência na Inserção e Remoção O(log n):** Numa lista, ordenada ou não, as principais funções serão de tempo linear. A heap é uma estrutura que permite tanto inserção quanto busca e remoção em tempo O(log n), através das operações `fix_up` e `fix_down`.
 
 3. **Estabilidade:** Pela forma como a função de comparação é construida, a heap garante que, se dois pacientes possuem o mesmo nível de prioridade, será atendido aquele que chegou primeiro.
+
+Outras opções seriam heap dinâmica e listas. A heap dinâmica foi preterida por ser mais lenta devido à alocação de memória, além de ter um gasto adicional de memória com ponteiros. Como o tamanho da fila é limitado e pequeno, não compensa microajustar o tamanho da heap e "desperdiçar" memória com ponteiros. O problema com as listas é que elas são obrigatoriamente O(n) para alguma operação.
 
 ## Estrutura Geral do Projeto
 
