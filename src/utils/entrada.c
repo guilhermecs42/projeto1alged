@@ -94,6 +94,8 @@ Comando perguntar_comando(){
 			return acao;
 		}
 	}while(acao != SAIR);
+
+	return SAIR;
 }
 
 bool perguntar_string(char* buffer_saida, int tamanho_buffer) {
@@ -237,6 +239,8 @@ Prioridade perguntar_prioridade(){
 			return acao;
 		}
 	}while(1);
+
+	return SAIR_PRIORIDADE;
 }
 
 unsigned char perguntar_inserir(){
