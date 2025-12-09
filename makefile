@@ -1,17 +1,48 @@
-all:
-	gcc -c fila.c -o fila.o
-	gcc -c pilha.c -o pilha.o
-	gcc -c lista.c -o lista.o
-	gcc -c tratamento.c -o tratamento.o
-	gcc -c paciente.c -o paciente.o
-	gcc -c entrada.c -o entrada.o
-	gcc fila.o pilha.o lista.o tratamento.o paciente.o entrada.o main.c -o main
-	./main
+# Nome do executável final
+APPS = hospital_sus
+
+# Compilador e Flags
+CC = gcc
+# -I./include diz ao compilador para procurar .h dentro da pasta include e subpastas
+CFLAGS = -Wall -Wextra -g -I./include -I./include/tad_estruturas -I./include/tad_elementos -I./include/utils
+
+# Pastas
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = .
+
+# Encontrar todos os arquivos .c recursivamente dentro de src/
+SRCS := $(shell find $(SRC_DIR) -name '*.c')
+
+# Gerar os nomes dos objetos .o mantendo a estrutura de pastas ou simplificando
+# Aqui vamos simplificar jogando todos os .o na pasta obj/ (flat object folder)
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+
+# Regra principal (Default)
+all: $(APPS)
+
+# Linkagem: Cria o executável
+$(APPS): $(OBJS)
+	@echo "Ligando objetos..."
+	$(CC) $(OBJS) -o $@
+
+# Compilação: Transforma .c em .o
+# A flag -p cria a pasta obj se não existir
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Limpeza
 clean:
-	rm fila.o
-	rm entrada.o
-	rm pilha.o
-	rm lista.o
-	rm tratamento.o
-	rm paciente.o
-	rm main
+	@echo "Limpando arquivos temporários..."
+	rm -rf $(OBJ_DIR) $(APPS) core
+	
+run: all
+	./hospital_sus
+
+# Rodar com Valgrind (opcional)
+valgrind: all
+	valgrind --leak-check=full --track-origins=yes ./$(APPS)
+
+.PHONY: all clean valgrind

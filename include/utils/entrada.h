@@ -17,7 +17,18 @@
 		NUM_COMANDOS, // valor implícito é igual ao número de comandos nas linhas acima
 		COMANDO_INVALIDO = -1, // valor explícito -1
 	} Comando;
-
+	
+	typedef enum{
+		EMERGENCIA, // A
+		MUITOURGENTE, // B
+		URGENTE, // C
+		POUCOURGENTE, // D
+		NAOURGENTE, // E
+		NUM_PRIORIDADES, // valor implícito é igual ao número de comandos nas linhas acima
+		SAIR_PRIORIDADE,
+		PRIORIDADE_INVALIDA = -1,
+	} Prioridade;
+	
 	bool confirmar(void);
 	/*
 	A função confirmar retorna true caso o usuário tenha digitado 1, 11, 111, etc.
@@ -45,7 +56,7 @@
 	A função perguntar_string é usada para ler nomes que o usuário digita
 	Ela retorna true em caso de sucesso e false em caso de fracasso
 	O parâmetro tamanho_buffer deve corresponder ao tamanho da string buffer_saida, para previnir buffer overflow
-	Essa função também tem um sistema de perguntar o input de novo caso o usuário digite demais
+	Essa função também tem o protocolo de perguntar o input de novo caso o usuário digite demais
 	*/
 	
 	bool perguntar_numero(int* numero_saida);
@@ -53,7 +64,23 @@
 	A função perguntar_numero é usada para ler números (IDs) que o usuário digita
 	Ela retorna true em caso de sucesso e false em caso de fracasso
 	A variável apontada pelo ponteiro numero_saida recebe o valor do número digitado pelo usuário
-	Essa função também tem um sistema de perguntar o input de novo caso o usuário digite demais
+	Essa função também tem o protocolo de perguntar o input de novo caso o usuário digite demais
+	*/
+	
+	Prioridade perguntar_prioridade();
+	/*
+	A função perguntar_prioridade é usada para ler números o nível de prioridade de atendimento a um paciente
+	Ela é resistente a inputs duplicados (ex: DD é lido como D, mas AD é inválido).
+	Essa função também tem o protocolo de perguntar o input de novo caso o usuário digite demais
+	*/
+	
+	unsigned char perguntar_inserir();
+	/*
+	A função perguntar_inserir é usada para ler se um paciente já está no registro ou deve ser registrado no momento
+	0 -> cancelar operação
+	1 -> paciente já existe
+	2 -> paciente novo
+	Ela retorna o número em forma de unsigned char. É resistente a buffer overflow.
 	*/
 	
 #endif

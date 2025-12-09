@@ -1,0 +1,44 @@
+===INICIO==REGISTRO===
+7
+======INICIO=AVL======
+4
+===INICIO==PACIENTE===
+4
+Kaike
+======BASE=PILHA======
+===INICIO==TRATAMENTO===
+Idade jovem
+=====FIM=TRATAMENTO=====
+======TOPO=PILHA======
+====FIM===PACIENTE====
+===INICIO==PACIENTE===
+2
+Ater Isco
+======BASE=PILHA======
+======TOPO=PILHA======
+====FIM===PACIENTE====
+===INICIO==PACIENTE===
+1
+Romando Alderson
+======BASE=PILHA======
+===INICIO==TRATAMENTO===
+Comer bosta
+=====FIM=TRATAMENTO=====
+===INICIO==TRATAMENTO===
+Cavar um buraco
+=====FIM=TRATAMENTO=====
+======TOPO=PILHA======
+====FIM===PACIENTE====
+#
+#
+#
+===INICIO==PACIENTE===
+6
+0
+======BASE=PILHA======
+======TOPO=PILHA======
+====FIM===PACIENTE====
+#
+#
+======FIM=AVL======
+====FIM===REGISTRO====

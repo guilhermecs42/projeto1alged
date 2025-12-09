@@ -2,7 +2,7 @@
   #define LISTA_H
 	#include <stdio.h>
 	#include <stdbool.h>
-  #include "tabela_funcoes.h"
+  #include "../utils/tabela_funcoes.h"
 	
 	typedef struct lista_ LISTA;
 	

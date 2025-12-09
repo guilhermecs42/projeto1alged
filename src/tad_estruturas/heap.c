@@ -2,7 +2,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include "tabela_funcoes.h"
+#include "../../include/tad_estruturas/heap.h"
+#include "../../include/utils/tabela_funcoes.h"
 #define CAPACIDADE_INICIAL 100
 
 typedef struct mheap_ HEAP;
@@ -30,7 +31,7 @@ static void swap(HEAP* heap, int i, int j){
 
 // Retorna true caso no a > no b
 bool no_comparar(NO *no_a, NO *no_b){
-    if(no_a->priority > no_b->priority) return true;
+    if(no_a->priority < no_b->priority) return true;
 
     if(no_a->priority == no_b->priority){
         if(no_a->ordem < no_b->ordem) return true;
@@ -42,8 +43,8 @@ int qsort_no_comparar(const void *a, const void *b){
     NO *no_a = *(NO **)a;
     NO *no_b = *(NO **)b;
 
-    if(no_a->priority > no_b->priority) return -1; // A vem antes de B
-    if(no_a->priority < no_b->priority) return 1;  // B vem antes de A
+    if(no_a->priority < no_b->priority) return -1; // A vem antes de B
+    if(no_a->priority > no_b->priority) return 1;  // B vem antes de A
 
     if(no_a->ordem < no_b->ordem) return -1; // A (mais antigo) vem antes
     if(no_a->ordem > no_b->ordem) return 1;  // A (mais novo) vem depois
@@ -140,17 +141,26 @@ void heap_imprimir(HEAP* heap){
         printf("\nFila de Espera vazia.\n");
         return;
     }
+    
+	NO** copia = (NO**)malloc(heap->tam*sizeof(NO*)); // cria uma cópia dos nós da heap
+    if(copia == NULL){
+        printf("Erro de memória ao tentar imprimir a fila.\n");
+        return;
+    }
+    memcpy(copia, heap->no, heap->tam*sizeof(NO*)); // faz as cópias dos nós
 
-    qsort(heap->no, heap->tam, sizeof(NO *), qsort_no_comparar);
+    qsort(copia, heap->tam, sizeof(NO *), qsort_no_comparar);
 
     printf("\n=== FILA DE ESPERA (ORDENADA POR PRIORIDADE) ===\n");
     for(int i = 0; i < heap->tam; i++){
         printf("------------------------------------------------\n");
-        printf("Prioridade: %c | Ordem de Chegada: %d\n", heap->no[i]->priority, heap->no[i]->ordem);
-        heap->item_funcoes->item_imprimir(heap->no[i]->item);
+        printf("Prioridade: %c | Ordem de Chegada: %d\n", copia[i]->priority, copia[i]->ordem);
+        heap->item_funcoes->item_imprimir(copia[i]->item);
     }
     printf("------------------------------------------------\n");
     printf("Total na fila: %d\n", heap->tam);
+    
+    free(copia);
 }
 
 bool heap_inserir(HEAP* heap, void* item, char priority){
@@ -166,7 +176,7 @@ bool heap_inserir(HEAP* heap, void* item, char priority){
         return false; 
     }
     novo_no->item = item;
-    novo_no->priority = priority;
+    novo_no->priority = priority + 'A';
     novo_no->ordem = heap->ordem;
     heap->no[heap->tam] = novo_no;
 
@@ -233,9 +243,15 @@ bool heap_carregar(HEAP** heap, FILE* arquivo){
     if(*heap == NULL || (*heap)->item_funcoes == NULL || (*heap)->item_funcoes->item_carregar == NULL){
         return false;
     }
+    
+    bool erro = false;
     char linha[100];
     long int ultima_pos = ftell(arquivo);
-    fgets(linha, 100, arquivo);
+    
+    if(fgets(linha, 100, arquivo) == NULL){
+    	fseek(arquivo, ultima_pos, SEEK_SET);
+        return false;
+    }
     if(strcmp(linha, "======INICIO=HEAP======\n") != 0){
         fseek(arquivo, ultima_pos, SEEK_SET);
         return false;
@@ -266,11 +282,13 @@ bool heap_carregar(HEAP** heap, FILE* arquivo){
         char prioridade;
         int ordem_no;
         if(fscanf(arquivo, "%c;%d\n", &prioridade, &ordem_no) != 2){
+        	erro = true;
             break;
         }
 
         void* item;
         if(heap_temp->item_funcoes->item_carregar(&item, arquivo) == false){
+        	 erro = true;
              break;
         }
 
@@ -280,6 +298,7 @@ bool heap_carregar(HEAP** heap, FILE* arquivo){
                 // Se falhar alocação, limpa item e sai
                 if(heap_temp->item_funcoes->item_apagar) 
                     heap_temp->item_funcoes->item_apagar(&item);
+                erro = true;
                 break;
             }
         }
@@ -288,6 +307,7 @@ bool heap_carregar(HEAP** heap, FILE* arquivo){
         if(novo_no == NULL){
              if(heap_temp->item_funcoes->item_apagar) 
                 heap_temp->item_funcoes->item_apagar(&item);
+             erro = true;
              break;
         }
 
@@ -298,8 +318,14 @@ bool heap_carregar(HEAP** heap, FILE* arquivo){
         heap_temp->no[heap_temp->tam] = novo_no;
         heap_temp->tam++;
     }
-
-    heap_apagar(heap);
-    *heap = heap_temp;
-    return true;
+    
+    if(erro){
+        heap_apagar(&heap_temp);
+        fseek(arquivo, ultima_pos, SEEK_SET);
+        return false;
+    } else {
+        heap_apagar(heap);
+        *heap = heap_temp;
+        return true;
+    }
 }

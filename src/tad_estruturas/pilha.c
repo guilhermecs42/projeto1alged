@@ -1,7 +1,7 @@
 #include<stdlib.h>
 #include<string.h>
-#include "pilha.h"
-#include "tabela_funcoes.h"
+#include "../../include/tad_estruturas/pilha.h"
+#include "../../include/utils/tabela_funcoes.h"
 
 
 typedef struct no_ NO;

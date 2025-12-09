@@ -1,7 +1,7 @@
 #include<stdlib.h>
 #include<string.h>
-#include "tratamento.h"
-#include "tabela_funcoes.h"
+#include "../../include/tad_elementos/tratamento.h"
+#include "../../include/utils/tabela_funcoes.h"
 
 struct tratamento_{
 	char medicamento[101];

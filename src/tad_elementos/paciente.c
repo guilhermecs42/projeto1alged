@@ -1,16 +1,18 @@
-#include "paciente.h"
-#include "pilha.h"
+#include "../../include/tad_elementos/paciente.h"
+#include "../../include/tad_estruturas/pilha.h"
 #include<string.h>
 #include<stdlib.h>
 
+#define TAM_NOME 95
+
 struct paciente{
 	int id;
-	char nome[101];
+	char nome[TAM_NOME];
 	PILHA* historico;
 };
 
 
-PACIENTE* paciente_criar(const int id, const char nome[]){
+PACIENTE* paciente_criar(int id, char nome[]){
 	if(strlen(nome)>100){
 		return NULL;
 	}
@@ -25,6 +27,19 @@ PACIENTE* paciente_criar(const int id, const char nome[]){
 		strcpy(paciente->nome, nome);
 	}
 	return paciente;
+}
+
+void paciente_set_id(PACIENTE* paciente, int id) {
+    if (paciente != NULL) {
+        paciente->id = id;
+    }
+}
+
+void paciente_set_nome(PACIENTE* paciente, char* nome) {
+    if (paciente != NULL && nome != NULL) {
+        strncpy(paciente->nome, nome, TAM_NOME);
+        paciente->nome[TAM_NOME] = '\0';
+    }
 }
 
 bool paciente_apagar(void** paciente){
@@ -72,6 +87,7 @@ bool paciente_imprimir(void* paciente){
 	if(paciente==NULL) return false;
 	PACIENTE* p = (PACIENTE*) paciente;
 	printf("Nome: %s\nID: %d\n", p->nome, p->id);
+	return true;
 }
 
 int paciente_get_id(PACIENTE* paciente){
@@ -79,6 +95,14 @@ int paciente_get_id(PACIENTE* paciente){
 		return -1;
 	}else{
 		return paciente->id;
+	}
+}
+
+char* paciente_get_nome(PACIENTE* paciente){
+	if(paciente == NULL){
+		return NULL;
+	}else{
+		return paciente->nome;
 	}
 }
 
@@ -127,7 +151,7 @@ bool paciente_carregar(void** paciente, FILE* arquivo){
     }
 
     int id;
-    char nome[101];
+    char nome[TAM_NOME];
 
 	// Lendo o id:
     if (fgets(buffer, sizeof(buffer), arquivo) == NULL || sscanf(buffer, "%d", &id) != 1) {
