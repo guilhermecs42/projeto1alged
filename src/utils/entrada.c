@@ -182,9 +182,6 @@ Prioridade decifrar_prioridade(char input[]){
 	
 	int i=0;
 	while(input[i]!='\0' && input[i+1]!='\0'){ // percorre a linha toda
-	
-		char atual = toupper(input[i]);
-        char proximo = toupper(input[i+1]);
         
 		if(input[i]=='\n' || input[i+1]=='\n'){ // não faça a próxima comparação com \n !!!
 			i++; 
