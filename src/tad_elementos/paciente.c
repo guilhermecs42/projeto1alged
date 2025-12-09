@@ -119,8 +119,6 @@ int paciente_comparar(void* paciente1, void* paciente2){
 	if(p2 == NULL) return 1; // se o segundo for nulo e o primeiro não, retorna positivo
 	if(p1 == NULL) return -1; // se o primeiro for nulo e o segundo não, retorna negativo
 	
-	if(p1->id == p2->id) return 0;
-	if(strcmp(p1->nome, p2->nome) == 0) return 0;
 	return (p1->id - p2->id);
 }
 
