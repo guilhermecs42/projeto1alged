@@ -1,0 +1,17 @@
+======INICIO=HEAP======
+3
+C;0
+===INICIO==PACIENTE===
+1
+Romando Alderson
+======BASE=PILHA======
+======TOPO=PILHA======
+====FIM===PACIENTE====
+D;1
+===INICIO==PACIENTE===
+6
+0
+======BASE=PILHA======
+======TOPO=PILHA======
+====FIM===PACIENTE====
+======FIM=HEAP======

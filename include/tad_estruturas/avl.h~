@@ -1,0 +1,47 @@
+#ifndef AVL_H
+#define AVL_H
+
+#include <stdio.h>
+#include <stdbool.h>
+#include "tabela_funcoes.h"
+
+
+typedef struct avl_ AVL;
+
+//Cria uma nova árvore AVL vazia
+AVL* avl_criar(const TabelaFuncoes* funcoes);
+
+// Destrói a árvore AVL e libera toda a memória
+void avl_apagar(AVL** avl);
+
+// Retorna a quantidade de elementos na árvore
+int avl_tamanho(AVL* avl);
+
+//Verifica se a árvore está vazia
+bool avl_vazia(AVL* avl);
+
+//Insere um item na árvore
+bool avl_inserir(AVL* avl, void* item);
+
+//Remove um item da árvore
+bool avl_remover(AVL* avl, void* chave);
+
+//Busca um item na árvore 
+void* avl_buscar(AVL* avl, void* chave);
+
+//Imprime a árvore em ordem 
+void avl_imprimir(AVL* avl);
+
+//Salva a árvore em um arquivo
+bool avl_salvar(AVL* avl, FILE* arquivo);
+
+//Carrega uma árvore de um arquivo
+bool avl_carregar(AVL** avl, FILE* arquivo);
+
+//Retorna a altura da árvore
+int avl_altura(AVL* avl);
+
+//Verifica se a árvore está balanceada
+bool avl_balanceada(AVL* avl);
+
+#endif
